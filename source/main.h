@@ -18,44 +18,31 @@ void checkHostnames();
 // List of connection hostnames to test
 const char *connectionhostnames[] = {
     "conntest.nintendowifi.net",
-    "ctest.cdn.nintendo.net"
+    "ctest.cdn.nintendo.net",
+    "cloudflare.com",
+    "example.com",
+    "fortheusers.org",
+    "github.com",
+    "google.com",
+    "nist.gov",
+    "ntp.org"
+
 };
 
 // List of hostnames to test
 const char *hostnames[] = {
+    "nintendo.ch",
     "nintendo.com",
-    "nintendo.net",
-    "nintendo.jp",
-    "nintendo.co.jp",
-    "nintendo.co.uk",
-    "nintendo-europe.com",
-    "nintendowifi.net",
-    "nintendo.es",
-    "nintendo.co.kr",
-    "nintendo.tw",
-    "nintendo.com.hk",
-    "nintendo.com.au",
-    "nintendo.co.nz",
-    "nintendo.at",
-    "nintendo.be",
-    "nintendods.cz",
     "nintendo.dk",
-    "nintendo.de",
     "nintendo.fi",
-    "nintendo.fr",
     "nintendo.gr",
     "nintendo.hu",
-    "nintendo.it",
-    "nintendo.nl",
     "nintendo.no",
-    "nintendo.pt",
-    "nintendo.ru",
-    "nintendo.co.za",
+    "nintendo.pl",
     "nintendo.se",
-    "nintendo.ch",
     "nintendoswitch.cn",
-    "nintendoswitch.com.cn",
     "nintendoswitch.com",
+    "nintendoswitch.com.cn",
     "sun.hac.lp1.d4c.nintendo.net"
 };
 
