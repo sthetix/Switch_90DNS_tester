@@ -8,11 +8,21 @@
 
 PrintConsole *console;
 
+static void resetConsoleScreen(void)
+{
+    consoleSelect(console);
+    consoleClear();
+    printf("\x1b[2J\x1b[H");
+    consoleUpdate(console);
+}
+
 int main(int argc, char **argv)
 {
     // Initialize default console
     console = consoleGetDefault();
     consoleInit(console);
+
+    resetConsoleScreen();
 
     // Configure pad for player 1 accepting input from any controller
     PadState pad;
@@ -40,7 +50,7 @@ int main(int argc, char **argv)
         // Retry on X
         if (kDown & HidNpadButton_X)
         {
-            consoleClear();
+            resetConsoleScreen();
             checkHostnames();
         }
     }
@@ -53,7 +63,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void checkHostnames() 
+void checkHostnames()
 {
     printf("90DNS Testing Utility v1.0.4\n\n");
 
@@ -61,76 +71,69 @@ void checkHostnames()
     Result net_rc = nifmGetInternetConnectionStatus(NULL, NULL, NULL);
     if (R_FAILED(net_rc)) {
         printf(CONSOLE_RED "WARNING, NOT CONNECTED TO ANY NETWORK! AIRPLANE MODE?\n" CONSOLE_RESET);
-    }
+    } else {
+        printf("Testing:\n");
+        // Iterate through hostnames array
+        for (int i = 0; i < sizeof(hostnames) / sizeof(hostnames[0]); i++)
+        {
+            // Print hostname in a fixed-width field, then temporary dots
+            printf("  %-30s ...", hostnames[i]);
+            consoleUpdate(console);
 
-    printf("Testing:\n");
-	
-	// Iterate through connection hostnames array
-    for (int i = 0; i < sizeof(connectionhostnames)/sizeof(connectionhostnames[0]); i++)
-    {
-        // Print the connection hostname
-        printf("\x1b[2C%s", connectionhostnames[i]);
-        // Move the cursor and print progress dots
-        printf("\x1b[%dC", 40-console->cursorX);
-        printf("...");
-        // Update console here so we get a "live" output
-        consoleUpdate(console);
+            // Resolve the hostname
+            int result = resolveHostname(hostnames[i]);
 
-        // Resolve the connection hostname
-        int result = resolveConnHostname(connectionhostnames[i]);
+            // Move back 3 characters to overwrite dots
+            printf("\x1b[3D");
 
-        // Move the cursor back 3 steps to overwrite the dots and print status
-        printf("\x1b[3D");
-        switch(result) {
-            case DNS_BLOCKED:
-                printf(CONSOLE_GREEN "redirected");
-                break;
-            case DNS_RESOLVED:
-                printf(CONSOLE_RED "unredirected");
-                break;
-            case DNS_UNRESOLVED:
-                printf(CONSOLE_YELLOW "unresolved");
-                break;
+            // Print the status
+            switch(result) {
+                case DNS_BLOCKED:
+                    printf(CONSOLE_GREEN "blocked" CONSOLE_RESET);
+                    break;
+                case DNS_RESOLVED:
+                    printf(CONSOLE_RED "unblocked" CONSOLE_RESET);
+                    break;
+                case DNS_UNRESOLVED:
+                    printf(CONSOLE_YELLOW "unresolved" CONSOLE_RESET);
+                    break;
+            }
+
+            // End the line cleanly
+            printf("\n");
+            consoleUpdate(console);
         }
 
-        // Reprint hostname with changed color
-        printf("\x1b[%dD%s\n" CONSOLE_RESET, console->cursorX-2, connectionhostnames[i]);
+        // Iterate through connection hostnames array
+        for (int i = 0; i < sizeof(connectionhostnames) / sizeof(connectionhostnames[0]); i++)
+        {
+            // Print hostname in a fixed-width field, then temporary dots
+            printf("  %-30s ...", connectionhostnames[i]);
+            consoleUpdate(console);
 
-        consoleUpdate(console);
-    }
+            // Resolve the connection hostname
+            int result = resolveConnHostname(connectionhostnames[i]);
 
-    // Iterate through hostnames array
-    for (int i = 0; i < sizeof(hostnames)/sizeof(hostnames[0]); i++)
-    {
-        // Print the hostname
-        printf("\x1b[2C%s", hostnames[i]);
-        // Move the cursor and print progress dots
-        printf("\x1b[%dC", 40-console->cursorX);
-        printf("...");
-        // Update console here so we get a "live" output
-        consoleUpdate(console);
+            // Move back 3 characters to overwrite dots
+            printf("\x1b[3D");
 
-        // Resolve the hostname
-        int result = resolveHostname(hostnames[i]);
+            // Print the status
+            switch(result) {
+                case DNS_BLOCKED:
+                    printf(CONSOLE_GREEN "redirected" CONSOLE_RESET);
+                    break;
+                case DNS_RESOLVED:
+                    printf(CONSOLE_RED "unredirected" CONSOLE_RESET);
+                    break;
+                case DNS_UNRESOLVED:
+                    printf(CONSOLE_YELLOW "unresolved" CONSOLE_RESET);
+                    break;
+            }
 
-        // Move the cursor back 3 steps to overwrite the dots and print status
-        printf("\x1b[3D");
-        switch(result) {
-            case DNS_BLOCKED:
-                printf(CONSOLE_GREEN "blocked");
-                break;
-            case DNS_RESOLVED:
-                printf(CONSOLE_RED "unblocked");
-                break;
-            case DNS_UNRESOLVED:
-                printf(CONSOLE_YELLOW "unresolved");
-                break;
+            // End the line cleanly
+            printf("\n");
+            consoleUpdate(console);
         }
-
-        // Reprint hostname with changed color
-        printf("\x1b[%dD%s\n" CONSOLE_RESET, console->cursorX-2, hostnames[i]);
-
-        consoleUpdate(console);
     }
 
     printf("\nPress B to exit. Press X to retry.");
