@@ -64,6 +64,40 @@ void checkHostnames()
     }
 
     printf("Testing:\n");
+	
+	// Iterate through connection hostnames array
+    for (int i = 0; i < sizeof(connectionhostnames)/sizeof(connectionhostnames[0]); i++)
+    {
+        // Print the connection hostname
+        printf("\x1b[2C%s", connectionhostnames[i]);
+        // Move the cursor and print progress dots
+        printf("\x1b[%dC", 40-console->cursorX);
+        printf("...");
+        // Update console here so we get a "live" output
+        consoleUpdate(console);
+
+        // Resolve the connection hostname
+        int result = resolveConnHostname(connectionhostnames[i]);
+
+        // Move the cursor back 3 steps to overwrite the dots and print status
+        printf("\x1b[3D");
+        switch(result) {
+            case DNS_BLOCKED:
+                printf(CONSOLE_GREEN "redirected");
+                break;
+            case DNS_RESOLVED:
+                printf(CONSOLE_RED "unredirected");
+                break;
+            case DNS_UNRESOLVED:
+                printf(CONSOLE_YELLOW "unresolved");
+                break;
+        }
+
+        // Reprint hostname with changed color
+        printf("\x1b[%dD%s\n" CONSOLE_RESET, console->cursorX-2, connectionhostnames[i]);
+
+        consoleUpdate(console);
+    }
 
     // Iterate through hostnames array
     for (int i = 0; i < sizeof(hostnames)/sizeof(hostnames[0]); i++)
@@ -101,6 +135,29 @@ void checkHostnames()
 
     printf("\nPress B to exit. Press X to retry.");
     consoleUpdate(console);
+}
+
+RESOLVER_STATUS resolveConnHostname(const char* connhostname)
+{
+    struct hostent *he;
+    struct in_addr a;
+    // use gethostbyname to attempt connhostname connection
+    he = gethostbyname(connhostname);
+    if (he)
+    {
+        // go over all returned addresses for connhostname
+        while (*he->h_addr_list)
+        {
+            bcopy(*he->h_addr_list++, (char *) &a, sizeof(a));
+            // succeed if any of them redirect to desired connection address
+            if ((strcmp(inet_ntoa(a), CONNECTION_REDIRECT_ADDRESS_USA) == 0) || (strcmp(inet_ntoa(a), CONNECTION_REDIRECT_ADDRESS_FRANCE) == 0) || (strcmp(inet_ntoa(a), CONNECTION_REDIRECT_ADDRESS_SELFHOST) == 0))
+            {
+                return DNS_BLOCKED;
+            }
+        }
+        return DNS_RESOLVED;
+    }
+    return DNS_UNRESOLVED;
 }
 
 RESOLVER_STATUS resolveHostname(const char* hostname)

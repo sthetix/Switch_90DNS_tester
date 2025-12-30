@@ -7,12 +7,22 @@ typedef enum RESOLVER_STATUS {
     DNS_UNRESOLVED
 } RESOLVER_STATUS;
 
+RESOLVER_STATUS resolveConnHostname(const char* connhostname);
 RESOLVER_STATUS resolveHostname(const char* hostname);
 void checkHostnames();
 
+#define CONNECTION_REDIRECT_ADDRESS_USA "207.246.121.77"
+#define CONNECTION_REDIRECT_ADDRESS_FRANCE "163.172.141.219"
+#define CONNECTION_REDIRECT_ADDRESS_SELFHOST "95.216.149.205"
+
+// List of connection hostnames to test
+const char *connectionhostnames[] = {
+    "conntest.nintendowifi.net",
+    "ctest.cdn.nintendo.net"
+};
+
 // List of hostnames to test
 const char *hostnames[] = {
-    "nintendo.com",
     "nintendo.com",
     "nintendo.net",
     "nintendo.jp",
