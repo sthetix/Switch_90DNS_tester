@@ -155,6 +155,9 @@ ifneq ($(APP_TITLEID),)
 	export NACPFLAGS += --titleid=$(APP_TITLEID)
 endif
 
+# Set ABI version to avoid homebrew manager warnings
+export NACPFLAGS += --abi=64bit
+
 ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
