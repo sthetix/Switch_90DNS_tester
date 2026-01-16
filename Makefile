@@ -162,7 +162,7 @@ ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: $(BUILD) clean all
+.PHONY: $(BUILD) clean all dist release
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)
@@ -172,12 +172,25 @@ $(BUILD):
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
+dist: $(BUILD)
+	@echo Creating distribution package...
+	@mkdir -p switch
+	@cp $(TARGET).nro switch/
+	@echo Package created in switch/$(TARGET).nro
+
+#---------------------------------------------------------------------------------
+release: dist
+	@echo Creating zip archive...
+	@zip -r $(TARGET)-$(APP_VERSION).zip switch
+	@echo Created $(TARGET)-$(APP_VERSION).zip
+
+#---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 ifeq ($(strip $(APP_JSON)),)
-	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf
+	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf switch $(TARGET)-*.zip
 else
-	@rm -fr $(BUILD) $(TARGET).nsp $(TARGET).nso $(TARGET).npdm $(TARGET).elf
+	@rm -fr $(BUILD) $(TARGET).nsp $(TARGET).nso $(TARGET).npdm $(TARGET).elf switch $(TARGET)-*.zip
 endif
 
 
